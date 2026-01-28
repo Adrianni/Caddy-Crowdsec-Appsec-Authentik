@@ -53,6 +53,7 @@ services:
     image: ghcr.io/goauthentik/server:2024.10.2
     container_name: authentik-server
     restart: unless-stopped
+    user: root
     command: server
     depends_on:
       authentik-postgres:
@@ -80,6 +81,7 @@ services:
     image: ghcr.io/goauthentik/server:2024.10.2
     container_name: authentik-worker
     restart: unless-stopped
+    user: root
     depends_on:
       authentik-postgres:
         condition: service_healthy
