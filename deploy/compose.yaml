@@ -127,6 +127,8 @@ services:
       - /opt/caddy/config:/config
       # Write logs to a shared volume (CrowdSec reads them)
       - /opt/caddy/logs:/var/log/caddy
+      # Access to PHP-fpm files
+      - /opt/php-fpm/data:/srv
     networks:
       - proxy
     stop_grace_period: 5s
