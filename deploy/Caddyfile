@@ -1,8 +1,6 @@
 {
-  # debug is handy during bring-up; remove when stable
   debug
 
-  # Access log -> shared volume, so CrowdSec can read it
   log {
     output file /var/log/caddy/access.log {
       roll_size 100MiB
@@ -22,16 +20,22 @@
   }
 }
 
+(authentik) {
+  forward_auth http://authentik-server:9000 {
+    uri /outpost.goauthentik.io/auth/caddy
+    copy_headers X-Authentik-Username X-Authentik-Groups X-Authentik-Entitlements X-Authentik-Email X-Authentik-Name X-Authentik-Uid X-Authentik-Jwt X-Authentik-Meta-Jwks X-Authentik-Meta-Outpost X-Authentik-Meta-Provider X-Authentik-Meta-App X-Authentik-Meta-Version
+  }
+
+  reverse_proxy /outpost.goauthentik.io/* http://authentik-server:9000 {
+    header_up Host {http.reverse_proxy.upstream.hostport}
+  }
+}
+
 :80, :443 {
   route {
     crowdsec
     appsec
-
-    redir /authentik /authentik/ 308
-
-    handle_path /authentik/* {
-      reverse_proxy authentik-server:9000
-    }
+    import authentik
 
     respond "Valid configuration. Crowdsec (✅ OK)<br> Appsec (✅ OK) <br> Authentik (✅ OK)" 200 {
       close
