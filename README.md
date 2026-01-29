@@ -46,7 +46,14 @@ cp dotenv_example .env
 nano .env
 ```
 
-Set `CROWDSEC_API_TOKEN`, `AUTHENTIK_SECRET_KEY`, and `AUTHENTIK_POSTGRES_PASSWORD` in `deploy/.env`.
+Set `CROWDSEC_API_TOKEN`, `AUTHENTIK_POSTGRES_PASSWORD`, and `AUTHENTIK_SECRET_KEY` in `deploy/.env`.
+
+Generate strong values for the Authentik variables:
+
+```bash
+echo "AUTHENTIK_POSTGRES_PASSWORD=$(openssl rand -base64 36 | tr -d '\n')"
+echo "AUTHENTIK_SECRET_KEY=$(openssl rand -base64 60 | tr -d '\n')"
+```
 
 ## 2) Start the stack (builds the Caddy + PHP-FPM images on first run)
 ```bash
@@ -84,6 +91,22 @@ docker compose exec crowdsec cscli metrics
 - AppSec must listen on 0.0.0.0:7422 in the container so Caddy can reach it.
 - Authentik images are pinned to a specific version in `deploy/compose.yaml` for reproducible upgrades.
 - Authentik uses a Docker socket proxy (instead of mounting `/var/run/docker.sock` directly) for outpost management. The proxy is limited to container/image and info access via `deploy/compose.yaml`.
+- Authentik bør bindes til `127.0.0.1` når den er konfigurert, slik at den ikke eksponeres direkte på nettverket. La Caddy stå for tilgang og videre routing.
+
+Example: bind Authentik to localhost in `deploy/compose.yaml` and proxy it via Caddy:
+
+```yaml
+  authentik-server:
+    ports:
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9443:9443"
+```
+
+```caddyfile
+auth.example.com {
+  reverse_proxy http://authentik-server:9000
+}
+```
 
 ## Updating packages and images
 When something needs updating, pull new images and rebuild the custom Caddy image:
