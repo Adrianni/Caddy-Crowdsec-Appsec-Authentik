@@ -1,4 +1,4 @@
-# Caddy (xcaddy custom) + CrowdSec (LAPI + AppSec) + Authentik – Docker stack
+# Caddy (xcaddy custom) + CrowdSec (LAPI + AppSec) + Authentik + Dockmon-agent – Docker stack
 
 This setup builds a custom Caddy binary with the following xcaddy modules:
 - github.com/sjtug/caddy2-filter
