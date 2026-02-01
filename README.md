@@ -14,7 +14,7 @@ It also runs CrowdSec in its own container (LAPI + AppSec), with collections ins
 - deploy/compose.yaml           -> runs the full stack (inkl. CrowdSec web UI)
 - deploy/Caddyfile              -> localhost Caddy config with CrowdSec/AppSec + Authentik
 - deploy/crowdsec/acquis.d/*    -> acquis for Caddy + AppSec
-- deploy/dotenv_example         -> copy to deploy/.env
+- deploy/dotenv_example         -> copy to /root/.env
 
 ## 1) Prepare
 Create the bind-mount directories on the host (Caddy runs as UID/GID 1000 in the image):
@@ -44,11 +44,10 @@ Go to the deploy folder and create `.env`:
 
 ```bash
 cd deploy
-cp dotenv_example .env
-nano .env
+cp -i dotenv_example /root/.env
+vim /root/.env
+cp -i deploy/dotenv_example /root/.env
 ```
-
-Set `CROWDSEC_API_TOKEN`, `AUTHENTIK_POSTGRES_PASSWORD`, `AUTHENTIK_SECRET_KEY`, and `AUTHENTIK_GUI_PASSWORD` in `deploy/.env`.
 
 Generate strong values for the Authentik variables:
 
