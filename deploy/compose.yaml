@@ -3,8 +3,9 @@ services:
     image: crowdsecurity/crowdsec:latest
     container_name: crowdsec
     restart: unless-stopped
+    env_file:
+      - /root/.env
     environment:
-      - TZ=Europe/Oslo
       # Install collections at startup (replaces manual `cscli collections install ...`)
       - COLLECTIONS=crowdsecurity/caddy crowdsecurity/appsec-virtual-patching crowdsecurity/appsec-generic-rules
     volumes:
@@ -20,10 +21,8 @@ services:
     image: postgres:16-alpine
     container_name: authentik-postgres
     restart: unless-stopped
-    environment:
-      - POSTGRES_PASSWORD=${AUTHENTIK_POSTGRES_PASSWORD}
-      - POSTGRES_USER=authentik
-      - POSTGRES_DB=authentik
+    env_file:
+      - /root/.env
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U authentik -d authentik"]
       interval: 10s
@@ -44,12 +43,7 @@ services:
       authentik-postgres:
         condition: service_healthy
     env_file:
-      - ./.env
-    environment:
-      - AUTHENTIK_POSTGRESQL__HOST=authentik-postgres
-      - AUTHENTIK_POSTGRESQL__USER=authentik
-      - AUTHENTIK_POSTGRESQL__NAME=authentik
-      - AUTHENTIK_POSTGRESQL__PASSWORD=${AUTHENTIK_POSTGRES_PASSWORD}
+      - /root/.env
     volumes:
       - /opt/Authentik/media:/media
       - /opt/Authentik/data:/data
@@ -69,12 +63,8 @@ services:
       authentik-postgres:
         condition: service_healthy
     env_file:
-      - ./.env
+      - /root/.env
     environment:
-      - AUTHENTIK_POSTGRESQL__HOST=authentik-postgres
-      - AUTHENTIK_POSTGRESQL__USER=authentik
-      - AUTHENTIK_POSTGRESQL__NAME=authentik
-      - AUTHENTIK_POSTGRESQL__PASSWORD=${AUTHENTIK_POSTGRES_PASSWORD}
       - DOCKER_HOST=tcp://docker-socket-proxy:2375
     command: worker
     volumes:
@@ -89,10 +79,11 @@ services:
     container_name: crowdsec_web_ui
     ports:
       - "3000:3000"
+    env_file:
+      - /root/.env
     environment:
       - CROWDSEC_URL=http://crowdsec:8080
       - CROWDSEC_USER=crowdsec-web-ui
-      - CROWDSEC_PASSWORD=${AUTHENTIK_GUI_PASSWORD}
       # Optional: Lookback period for alerts/stats (default: 168h/7d)
       - CROWDSEC_LOOKBACK_PERIOD=5d
       # Optional: Backend auto-refresh interval. Values: 0 (Off), 5s, 30s (default), 1m, 5m
@@ -110,6 +101,7 @@ services:
     restart: unless-stopped
     networks:
       - proxy
+
 
   docker-socket-proxy:
     image: tecnativa/docker-socket-proxy:latest
@@ -142,11 +134,9 @@ services:
       - "80:80"
       - "443:443"
     env_file:
-      - ./.env
-    environment:
-      - TZ=Europe/Oslo
+      - /root/.env
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - /opt/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
       - /opt/caddy/data:/data
       - /opt/caddy/config:/config
       # Write logs to a shared volume (CrowdSec reads them)
@@ -154,7 +144,8 @@ services:
       # Access to PHP-fpm files
       - /opt/caddy/www-data:/var/www:ro   # Caddy trenger typisk bare les
     networks:
-      - proxy
+      proxy:
+        ipv4_address: 172.18.0.11
     stop_grace_period: 5s
 
   php-fpm:
@@ -178,14 +169,15 @@ services:
     restart: unless-stopped
     depends_on:
       - docker-socket-proxy
+    env_file: 
+      - /root/.env
     environment:
       - DOCKMON_URL=https://192.168.50.130:8001
-      - REGISTRATION_TOKEN=${DOCKMON_register_TOKEN}
-      - TZ=Europe/Oslo
       - INSECURE_SKIP_VERIFY=true
       - DOCKER_HOST=tcp://docker-socket-proxy:2375
     volumes:
       - dockmon-agent-data:/data
+        #      - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - proxy
 
@@ -194,3 +186,10 @@ volumes:
 
 networks:
   proxy:
+    external: true
+    name: deploy_proxy
+    driver: bridge
+    ipam: 
+      config:
+        - subnet: 172.18.0.0/16
+          gateway: 172.18.0.1
