@@ -1,10 +1,33 @@
+# General
+TZ=Europe/Oslo
+
+# Dockmon-agent
+REGISTRATION_TOKEN=
+
 # CrowdSec bouncer API key (genereres etter oppstart med cscli bouncers add)
-CROWDSEC_API_TOKEN=put-your-crowdsec-bouncer-key-here
+CROWDSEC_API_TOKEN=
+
+# Crowdsec GUI
+CROWDSEC_PASSWORD=
+
+# Cloudflare API
+CLOUDFLARE_API_TOKEN=
+
+# Postgres Authentik config
+POSTGRES_PASSWORD=
+POSTGRES_USER=authentik
+POSTGRES_DB=authentik
 
 # Authentik configuration
-AUTHENTIK_SECRET_KEY=change-me-to-a-long-random-string
-AUTHENTIK_POSTGRES_PASSWORD=change-me
+AUTHENTIK_POSTGRES_PASSWORD=
+AUTHENTIK_SECRET_KEY=
 AUTHENTIK_HOST=http://authentik-server:9000
-# CrowdSec web UI password (matches cscli machines add crowdsec-web-ui --password ...)
-AUTHENTIK_GUI_PASSWORD=change-me
-# AUTHENTIK_HOST_BROWSER=https://auth.domain.tls # Uncomment when first time set up  of Authentik is done
+AUTHENTIK_HOST_BROWSER=https://auth.domain.tld
+#AUTHENTIK_GUI_PASSWORD=
+AUTHENTIK_POSTGRESQL__HOST=authentik-postgres
+AUTHENTIK_POSTGRESQL__USER=authentik
+AUTHENTIK_POSTGRESQL__NAME=authentik
+AUTHENTIK_POSTGRESQL__PASSWORD=
+
+# Tesla garasjepner
+TESLA_APP_TOKEN=
