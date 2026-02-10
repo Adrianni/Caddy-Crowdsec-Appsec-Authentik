@@ -24,7 +24,7 @@ sudo mkdir -p /opt/caddy/{www-data,data,config,logs} /opt/crowdsec/{data,config}
   /opt/crowdsec/data/acquis.d \
   /opt/Authentik/{postgres,media,data,custom-templates} \
   /opt/crowdsec-web-gui \
-  /opt/php-fpm/config
+  /opt/php-fpm/conf.d
 sudo chown -R 1000:1000 /opt/caddy/{www-data,data,config,logs}
 sudo chown -R 0:0 /opt/crowdsec/{data,config}
 sudo chown -R 1000:1000 /opt/Authentik/{postgres,media,data,custom-templates}
@@ -32,6 +32,11 @@ sudo chown -R 1000:1000 /opt/crowdsec-web-gui
 sudo chown -R 1000:1000 /opt/php-fpm/config
 sudo find /opt/caddy/www-data -type d -exec chmod 755 {} \;
 sudo find /opt/caddy/www-data -type f -exec chmod 644 {} \;
+```
+Copy php.ini and zz-hardening.ini into php-fpm directory:
+```bash
+sudo cp -a deploy/php-fpm/php.ini /opt/php-fpm/
+sudo cp -a deploy/php-fpm/zz-hardening.ini /opt/php-fpm/conf.d/
 ```
 
 Copy the CrowdSec acquis configuration into the host data path (so both CrowdSec + AppSec config live under `/opt/crowdsec/data`):
