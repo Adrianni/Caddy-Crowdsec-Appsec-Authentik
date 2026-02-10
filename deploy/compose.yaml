@@ -159,7 +159,8 @@ services:
     restart: unless-stopped
     volumes:
       - /opt/caddy/www-data:/var/www:rw   # PHP kan trenge skrive (uploads/cache)
-      - /opt/php-fpm/config:/usr/local/etc/php
+      - /opt/php-fpm/php.ini:/usr/local/etc/php/php.ini:ro
+      - /opt/php-fpm/conf.d/zz-hardening.ini:/usr/local/etc/php/conf.d/zz-hardening.ini:ro
     networks:
       - proxy
 
